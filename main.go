@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/tirava/RealTimeChat/server"
 	"log"
-	"realtimechat/server"
 )
 
 func main() {

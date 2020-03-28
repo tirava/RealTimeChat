@@ -28,6 +28,7 @@ func (serv *Server) socketHandler(w http.ResponseWriter, r *http.Request) {
 			}
 			if err := ws.WriteJSON(msg); err != nil {
 				log.Printf("ws send ping err: %v", err)
+				break
 			}
 		}
 	}()
@@ -71,7 +72,7 @@ func (serv *Server) socketHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	fmt.Println("CLSOED")
+	fmt.Println("CLOSED")
 	defer func() {
 		serv.submutex.Lock()
 		delete(serv.subscribers, id)
