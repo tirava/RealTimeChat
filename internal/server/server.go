@@ -12,8 +12,7 @@ type Subscriber func(msg string) error
 type Server struct {
 	router   *chi.Mux
 	upgrader *websocket.Upgrader
-
-	submutex    *sync.Mutex
+	sync.RWMutex
 	subscribers map[string]Subscriber
 }
 
@@ -26,10 +25,8 @@ func New() *Server {
 	}
 
 	serv := &Server{
-		router:   router,
-		upgrader: upgrader,
-
-		submutex:    &sync.Mutex{},
+		router:      router,
+		upgrader:    upgrader,
 		subscribers: map[string]Subscriber{},
 	}
 

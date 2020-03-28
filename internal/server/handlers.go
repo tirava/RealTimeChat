@@ -34,18 +34,21 @@ func (serv *Server) socketHandler(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	id := uuid.New().String()
-	serv.submutex.Lock()
+
+	serv.Lock()
 	serv.subscribers[id] = func(msg string) error {
 		m := Message{
 			Type: MTMessage,
 			Data: msg,
 		}
+
 		if err := ws.WriteJSON(m); err != nil {
 			log.Printf("ws msg fetch err: %v", err)
 		}
+
 		return nil
 	}
-	serv.submutex.Unlock()
+	serv.Unlock()
 
 	for {
 		msg := Message{}
@@ -62,20 +65,19 @@ func (serv *Server) socketHandler(w http.ResponseWriter, r *http.Request) {
 
 		if msg.Type == MTMessage {
 			fmt.Println(msg.Data)
-			serv.submutex.Lock()
+			serv.Lock()
 			for _, sub := range serv.subscribers {
 				if err := sub(msg.Data); err != nil {
 					log.Fatalf("ws msg subs err: %v", err)
 				}
 			}
-			serv.submutex.Unlock()
+			serv.Unlock()
 		}
 	}
 
 	fmt.Println("CLOSED")
-	defer func() {
-		serv.submutex.Lock()
-		delete(serv.subscribers, id)
-		serv.submutex.Unlock()
-	}()
+
+	serv.Lock()
+	delete(serv.subscribers, id)
+	serv.Unlock()
 }

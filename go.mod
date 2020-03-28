@@ -1,6 +1,6 @@
 module github.com/tirava/RealTimeChat
 
-go 1.14
+go 1.13
 
 require (
 	github.com/go-chi/chi v4.0.4+incompatible

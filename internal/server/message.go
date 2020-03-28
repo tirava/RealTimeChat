@@ -1,6 +1,7 @@
 package server
 
 type MessageType string
+
 const (
 	MTPing    MessageType = "ping"
 	MTPong    MessageType = "pong"
@@ -9,5 +10,5 @@ const (
 
 type Message struct {
 	Type MessageType `json:"type"`
-	Data string `json:"data,omitempty"`
+	Data string      `json:"data,omitempty"`
 }
