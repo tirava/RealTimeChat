@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
+	"github.com/tirava/RealTimeChat/internal/models"
 	"log"
 	"net/http"
 	"time"
 )
 
+// ApplyHandlers applies all handlers.
 func (serv *Server) ApplyHandlers() {
 	serv.router.Handle("/*", http.FileServer(http.Dir("./web")))
 	serv.router.Get("/socket", serv.socketHandler)
@@ -23,8 +25,8 @@ func (serv *Server) socketHandler(w http.ResponseWriter, r *http.Request) {
 	go func() {
 		for {
 			<-time.After(5 * time.Second)
-			msg := Message{
-				Type: MTPing,
+			msg := models.Message{
+				Type: models.MTPing,
 			}
 			if err := ws.WriteJSON(msg); err != nil {
 				log.Printf("ws send ping err: %v", err)
@@ -37,8 +39,8 @@ func (serv *Server) socketHandler(w http.ResponseWriter, r *http.Request) {
 
 	serv.Lock()
 	serv.subscribers[id] = func(msg string) error {
-		m := Message{
-			Type: MTMessage,
+		m := models.Message{
+			Type: models.MTMessage,
 			Data: msg,
 		}
 
@@ -51,7 +53,7 @@ func (serv *Server) socketHandler(w http.ResponseWriter, r *http.Request) {
 	serv.Unlock()
 
 	for {
-		msg := Message{}
+		msg := models.Message{}
 		if err := ws.ReadJSON(&msg); err != nil {
 			if !websocket.IsCloseError(err, 1001) {
 				log.Fatalf("ws msg read err: %v", err)
@@ -59,11 +61,11 @@ func (serv *Server) socketHandler(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 
-		if msg.Type == MTPong {
+		if msg.Type == models.MTPong {
 			continue
 		}
 
-		if msg.Type == MTMessage {
+		if msg.Type == models.MTMessage {
 			fmt.Println(msg.Data)
 			serv.Lock()
 			for _, sub := range serv.subscribers {
